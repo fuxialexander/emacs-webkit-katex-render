@@ -1,0 +1,36 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Katex</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.9.0/dist/katex.min.css" integrity="sha384-TEMocfGvRuD1rIAacqrknm5BQZ7W7uWitoih+jMNFXQIbNl16bO8OZmylH/Vi/Ei" crossorigin="anonymous">
+        <script src="https://cdn.jsdelivr.net/npm/katex@0.9.0/dist/katex.min.js" integrity="sha384-jmxIlussZWB7qCuB+PgKG1uLjjxbVVIayPJwi6cG6Zb4YKq0JIw+OMnkkEC7kYCq" crossorigin="anonymous"></script>
+        <style type="text/css" media="screen">
+        </style>
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    </head>
+    <body>
+        <script>
+          var suc = true
+          var lastSuc = ""
+          function try_render(math_str) {
+              try {
+                  math_str = decodeURIComponent(math_str) 
+                  katex.render(math_str, document.body, {
+                      displayMode: true
+                  });
+              } catch(err) {
+                  suc = false;
+                  katex.render(lastSuc, document.body, {
+                      displayMode: true
+                  });
+              }
+              if (suc==true) {
+                  lastSuc = math_str
+              }
+              return 0;
+          }
+        </script> 
+    </body>
+</html>
