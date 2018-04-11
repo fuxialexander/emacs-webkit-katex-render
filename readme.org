@@ -1,0 +1,25 @@
+#+TITLE: ~webkit-katex-render~: an instant Latex Previewer for Emacs
+
+
+* Install
+:PROPERTIES:
+:ID:       91137E8C-FC3C-4C77-8BA5-85699373C683
+:END:
+#+BEGIN_SRC elisp
+(use-package webkit-katex-render
+  :init
+  ;; if you use doom-emacs
+  (setq webkit-katex-render--background-color (doom-color 'fg))
+  ;; if you want to set a different path to the html client
+  (setq webkit-katex-render--client-path "PATH/TO/CLIENT.html")
+  ;; if you want to add your customized `math-at-point` function
+  (setq webkit-katex-render--math-at-point-function 'function))
+#+END_SRC
+
+* Usage
+:PROPERTIES:
+:ID:       87A6B5A3-08F1-4625-8E87-6E846A0A8B22
+:END:
+- ~M-x webkit-katex-render-mode~ to start the minor mode
+- Move your cursor to a latex fragment (currently in Org mode)
+- Try look around and type equations!
