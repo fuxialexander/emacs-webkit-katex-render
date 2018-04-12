@@ -5,7 +5,7 @@
 :PROPERTIES:
 :ID:       EC3438CD-4BEC-47A3-97CC-0CC32EEFC3B4
 :END:
-Please checkout the demo [[youtube:jPz-gUWbIaw][video]].
+Please checkout the demo [[https://youtu.be/jPz-gUWbIaw][video]].
 * Install
 :PROPERTIES:
 :ID:       91137E8C-FC3C-4C77-8BA5-85699373C683
