@@ -12,7 +12,7 @@ Please checkout the demo [[https://youtu.be/jPz-gUWbIaw][video]].
 :PROPERTIES:
 :ID:       0E541285-95C1-40E8-80A0-6878924D6D15
 :END:
-You need emacs compiled with `xwidget` support.
+You need emacs compiled with ~xwidget~ support.
 
 If you are on mac OS, you need to apply this [[https://gist.github.com/fuxialexander/0231e994fd27be6dd87db60339238813][patch]] to emacs master branch and compile using the following commands:
 #+BEGIN_SRC shell
@@ -26,7 +26,7 @@ If you are on Linux, maybe you can follow this [[https://jiegec.github.io/progra
 :PROPERTIES:
 :ID:       91137E8C-FC3C-4C77-8BA5-85699373C683
 :END:
-- `use-package`
+- ~use-package~
 #+BEGIN_SRC elisp
 (use-package webkit-katex-render
   :init
@@ -34,10 +34,10 @@ If you are on Linux, maybe you can follow this [[https://jiegec.github.io/progra
   (setq webkit-katex-render--background-color (doom-color 'bg))
   ;; if you want to set a different path to the html client
   (setq webkit-katex-render--client-path "PATH/TO/CLIENT.html")
-  ;; if you want to add your customized `math-at-point` function
+  ;; if you want to add your customized ~math-at-point~ function
   (setq webkit-katex-render--math-at-point-function 'function))
 #+END_SRC
-- My config for `doom-emacs`
+- My config for ~doom-emacs~
 #+BEGIN_SRC elisp
 (def-package! webkit-katex-render :load-path "~/Source/playground/emacs-webkit-katex-render"
   :commands (webkit-katex-render-mode)
