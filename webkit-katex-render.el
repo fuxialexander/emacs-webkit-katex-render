@@ -264,9 +264,76 @@
                            value type)))))))
     nil))
 
+(defun webkit-katex-render--tex-math-preprocess (math type)
+  "Preprocess current MATH environment with TYPE."
+  (cond ((eq type 'sw-on)
+         (setq math (substring math 2 -2)))
+        ((eq type 'sw-toggle)
+         (setq math (substring math 2 -2)))
+        ((eq type 'env-on)
+         (setq math (replace-regexp-in-string
+                     "\\\\"
+                     "\\"
+                     math t t))
+         (setq math
+               (replace-regexp-in-string
+                "begin{equation}\\|begin{align}\\|begin{align\\*}"
+                "begin{aligned}"
+                math))
+         (setq math
+               (replace-regexp-in-string
+                "end{equation}\\|end{align}\\|end{align\\*}"
+                "end{aligned}"
+                math)))
+        (t math))
+
+  math)
+
+(defun webkit-katex-render--tex-math-at-point ()
+  "Mark current math environment."
+  (if (texmathp)
+      (let* ((string (car texmathp-why))
+             (pos (cdr texmathp-why))
+             (reason (assoc string texmathp-tex-commands1))
+             (type (cadr reason)))
+        (cond
+         ((eq type 'env-on) ;; environments equation, align, etc.
+          (progn
+            (let ((cur (point))
+                  (count 1) beg end)
+              ;; Only change point and mark after beginning and end were found.
+              ;; Point should not end up in the middle of nowhere if the search fails.
+              (save-excursion
+                (dotimes (c count) (LaTeX-find-matching-end))
+                (setq end (line-beginning-position 2))
+                (goto-char cur)
+                (dotimes (c count) (LaTeX-find-matching-begin))
+                (setq beg (point)))
+              (webkit-katex-render--tex-math-preprocess
+               (buffer-substring-no-properties beg end) type))))
+         ;; ((eq type 'arg-on) ;; \ensuremath etc.
+         ;;  (goto-char pos)
+         ;;  (set-mark (point))
+         ;;  (forward-sexp 2)
+         ;;  (exchange-point-and-mark))
+         ((eq type 'sw-toggle) ;; $ and $$
+          (webkit-katex-render--tex-math-preprocess
+           (buffer-substring-no-properties pos (scan-sexps pos 1)) type))
+         ((eq type 'sw-on) ;; \( and \[
+          (webkit-katex-render--tex-math-preprocess
+           (save-excursion
+             (buffer-substring-no-properties
+              pos
+              (re-search-forward texmathp-onoff-regexp)))
+           type))))
+    nil))
+
 (defun webkit-katex-render--math-at-point ()
   "Return recognized math at point."
-  (or (webkit-katex-render--org-math-at-point)
+  (or (and (equal major-mode 'latex-mode)
+            (webkit-katex-render--tex-math-at-point))
+      (and (equal major-mode 'org-mode)
+           (webkit-katex-render--org-math-at-point))
       (when webkit-katex-render--math-at-point-function
         (funcall webkit-katex-render--math-at-point-function))))
 
