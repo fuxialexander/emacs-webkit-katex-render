@@ -13,11 +13,12 @@
     <body>
         <script>
           var suc = true
+          var decodedMath = ""
           var lastSuc = ""
           function try_render(math_str) {
               try {
-                  math_str = decodeURIComponent(math_str) 
-                  katex.render(math_str, document.body, {
+                  decodedMath = decodeURIComponent(math_str) 
+                  katex.render(decodedMath, document.body, {
                       displayMode: true
                   });
               } catch(err) {
@@ -27,7 +28,7 @@
                   });
               }
               if (suc==true) {
-                  lastSuc = math_str
+                  lastSuc = decodedMath
               }
               return 0;
           }
