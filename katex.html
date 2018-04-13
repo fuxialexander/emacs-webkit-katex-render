@@ -21,6 +21,7 @@
                   katex.render(decodedMath, document.body, {
                       displayMode: true
                   });
+                  suc = true;
               } catch(err) {
                   suc = false;
                   katex.render(lastSuc, document.body, {
