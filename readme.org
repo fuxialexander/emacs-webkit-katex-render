@@ -15,7 +15,7 @@ Please checkout the demo [[https://youtu.be/jPz-gUWbIaw][video]].
 (use-package webkit-katex-render
   :init
   ;; if you use doom-emacs
-  (setq webkit-katex-render--background-color (doom-color 'fg))
+  (setq webkit-katex-render--background-color (doom-color 'bg))
   ;; if you want to set a different path to the html client
   (setq webkit-katex-render--client-path "PATH/TO/CLIENT.html")
   ;; if you want to add your customized `math-at-point` function
