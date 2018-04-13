@@ -29,3 +29,10 @@ Please checkout the demo [[https://youtu.be/jPz-gUWbIaw][video]].
 - ~M-x webkit-katex-render-mode~ to start the minor mode
 - Move your cursor to a latex fragment (currently in Org mode)
 - Try look around and type equations!
+
+* Plans
+:PROPERTIES:
+:ID:       DBB49E9A-B377-43B7-B4CD-48E21736C37E
+:END:
+See [[https://github.com/fuxialexander/emacs-webkit-katex-render/issues?q=is%3Aissue+is%3Aopen+label%3Aenhancement][issue board]].
+
