@@ -50,7 +50,7 @@ If you are on Linux, maybe you can follow this [[https://jiegec.github.io/progra
 :ID:       87A6B5A3-08F1-4625-8E87-6E846A0A8B22
 :END:
 - ~M-x webkit-katex-render-mode~ to start the minor mode
-- Move your cursor to a latex fragment (currently in Org mode)
+- Move your cursor to a latex fragment (*in either org mode or latex-mode*)
 - Try look around and type equations!
 
 * Plans
