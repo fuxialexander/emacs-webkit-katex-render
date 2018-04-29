@@ -46,6 +46,7 @@
           "katex.html"))
 (defvar webkit-katex-render--buffer-name " *webkit-katex-render*")
 (defvar webkit-katex-render--resize-flag nil)
+(defvar webkit-katex-render--previous-math nil)
 (defvar webkit-katex-render--background-color (face-attribute 'default :background))
 ;; (defvar webkit-katex-render--background-color (doom-color 'bg))
 (defvar webkit-katex-render--math-at-point-function nil)
@@ -96,7 +97,7 @@
            (font-height (posframe--get-font-height position))
            (frame-resize-pixelwise t)
            (position (posframe-poshandler-point-bottom-left-corner
-                      `(;All poshandlers will get info from this plist.
+                      `(         ;All poshandlers will get info from this plist.
                         :position ,position
                         :font-height ,font-height
                         :font-width ,font-width
@@ -221,7 +222,7 @@
   'webkit-katex-render--render-helper)
 
 (defun webkit-katex-render--render-helper (math)
-  (webkit-katex-render--resize))
+  math)
 
 (defun webkit-katex-render--org-math-preprocess (math type)
   (if (eq type 'latex-fragment)
@@ -331,7 +332,7 @@
 (defun webkit-katex-render--math-at-point ()
   "Return recognized math at point."
   (or (and (equal major-mode 'latex-mode)
-            (webkit-katex-render--tex-math-at-point))
+           (webkit-katex-render--tex-math-at-point))
       (and (equal major-mode 'org-mode)
            (webkit-katex-render--org-math-at-point))
       (when webkit-katex-render--math-at-point-function
@@ -370,7 +371,10 @@
 (defun webkit-katex-render-update ()
   (let ((math-at-point (webkit-katex-render--math-at-point)))
     (if math-at-point
-        (webkit-katex-render-show math-at-point)
+        (if (not (eq math-at-point webkit-katex-render--previous-math))
+            (progn
+              (webkit-katex-render-show math-at-point)
+              (setq webkit-katex-render--previous-math math-at-point)))
       (webkit-katex-render-hide))))
 
 ;;;###autoload
