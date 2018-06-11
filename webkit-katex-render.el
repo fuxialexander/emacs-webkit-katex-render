@@ -48,6 +48,7 @@
 (defvar webkit-katex-render--resize-flag nil)
 (defvar webkit-katex-render--previous-math nil)
 (defvar webkit-katex-render--background-color (face-attribute 'default :background))
+(defvar webkit-katex-render--foreground-color (face-attribute 'default :foreground))
 ;; (defvar webkit-katex-render--background-color (doom-color 'bg))
 (defvar webkit-katex-render--math-at-point-function nil)
 (defvar webkit-katex-render--org-math-preprocess-function
@@ -153,6 +154,12 @@
   (webkit-katex-render--execute-script
    (format "document.body.style.background = '%s';"
            webkit-katex-render--background-color)))
+
+(defun webkit-katex-render--set-foreground ()
+  "Evaluate JS code in color picker Webkit instance."
+  (webkit-katex-render--execute-script
+   (format "document.body.style.foreground = '%s';"
+           webkit-katex-render--foreground-color)))
 
 (defvar webkit-katex-render--emulation-alist '((t . nil)))
 
@@ -349,6 +356,7 @@
         (setq webkit-katex-render--resize-flag nil)))
   (webkit-katex-render--show)
   (webkit-katex-render--set-background)
+  (webkit-katex-render--set-foreground)
   (webkit-katex-render--ensure-emulation-alist)
   (webkit-katex-render--enable-overriding-keymap webkit-katex-render--active-map)
   (webkit-katex-render--install-map)
