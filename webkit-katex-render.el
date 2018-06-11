@@ -74,7 +74,8 @@
         (xwidget-webkit-mode)
         (xwidget-webkit-goto-uri (xwidget-at 1)
                                  webkit-katex-render--client-path)
-        (webkit-katex-render--set-background)))))
+        (webkit-katex-render--set-background)
+        (webkit-katex-render--set-foreground)))))
 
 (defun webkit-katex-render--show ()
   "Make color picker childframe visible."
@@ -158,7 +159,7 @@
 (defun webkit-katex-render--set-foreground ()
   "Evaluate JS code in color picker Webkit instance."
   (webkit-katex-render--execute-script
-   (format "document.body.style.foreground = '%s';"
+   (format "document.body.style.color = '%s';"
            webkit-katex-render--foreground-color)))
 
 (defvar webkit-katex-render--emulation-alist '((t . nil)))
