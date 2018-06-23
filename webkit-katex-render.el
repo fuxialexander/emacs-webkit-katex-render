@@ -77,7 +77,7 @@
         (webkit-katex-render--set-background)
         (webkit-katex-render--set-foreground)))))
 
-(defun webkit-katex-render--show ()
+(defun webkit-katex-render--show (pos)
   "Make color picker childframe visible."
   (when-let* ((current-frame (selected-frame))
               (buffer (webkit-katex-render--get-buffer))
@@ -90,7 +90,7 @@
       (redraw-frame frame)
 
       (let*
-          ((position (point))
+          ((position pos)
            (parent-window (selected-window))
            (parent-frame (window-frame parent-window))
            (x-pixel-offset 0)
@@ -111,13 +111,13 @@
                         :y-pixel-offset ,y-pixel-offset))))
         (set-frame-position frame (car position) (cdr position))))))
 
-(defun webkit-katex-render--create ()
+(defun webkit-katex-render--create (pos)
   "Create a new posframe and launch Webkit."
   (posframe-show webkit-katex-render--buffer-name
                  :string " "
                  :min-width 40
                  :min-height 6
-                 :position (point))
+                 :position pos)
 
   (define-key (current-global-map) [xwidget-event]
     (lambda ()
@@ -212,7 +212,7 @@
               (width (frame-parameter frame 'width))
               (height (frame-parameter frame 'height))
               (new-width (+ 40 (ceiling (aref size 0))))
-              (new-height (+ 20 (* 2 (ceiling (aref size 1))))))
+              (new-height (+ 30 (ceiling (aref size 1)))))
     (set-frame-size frame new-width new-height t)))
 
 (defun webkit-katex-render--resize (&optional arg)
@@ -278,7 +278,9 @@
   (cond ((eq type 'sw-on)
          (setq math (substring math 2 -2)))
         ((eq type 'sw-toggle)
-         (setq math (substring math 2 -2)))
+         (if (string-prefix-p "$$" math)
+             (setq math (substring math 2 -2))
+           (setq math (substring math 1 -1))))
         ((eq type 'env-on)
          (setq math (replace-regexp-in-string
                      "\\\\"
@@ -295,7 +297,11 @@
                 "end{aligned}"
                 math)))
         (t math))
-
+  (setq math
+        (replace-regexp-in-string
+         "symbf"
+         "mathbf"
+         math))
   math)
 
 (defun webkit-katex-render--tex-math-at-point ()
@@ -309,32 +315,39 @@
          ((eq type 'env-on) ;; environments equation, align, etc.
           (progn
             (let ((cur (point))
-                  (count 1) beg end)
+                  (count 1)
+                  end)
               ;; Only change point and mark after beginning and end were found.
               ;; Point should not end up in the middle of nowhere if the search fails.
               (save-excursion
+                (goto-char pos)
+                (forward-char 1)
                 (dotimes (c count) (LaTeX-find-matching-end))
                 (setq end (line-beginning-position 2))
-                (goto-char cur)
+                (goto-char pos)
+                (forward-char 1)
                 (dotimes (c count) (LaTeX-find-matching-begin))
-                (setq beg (point)))
-              (webkit-katex-render--tex-math-preprocess
-               (buffer-substring-no-properties beg end) type))))
+                (setq beg (point))
+                (list end
+                      (webkit-katex-render--tex-math-preprocess
+                       (buffer-substring-no-properties beg end) type))))))
          ;; ((eq type 'arg-on) ;; \ensuremath etc.
          ;;  (goto-char pos)
          ;;  (set-mark (point))
          ;;  (forward-sexp 2)
          ;;  (exchange-point-and-mark))
          ((eq type 'sw-toggle) ;; $ and $$
-          (webkit-katex-render--tex-math-preprocess
-           (buffer-substring-no-properties pos (scan-sexps pos 1)) type))
+          (save-excursion
+            (let ((end (scan-sexps pos 1)))
+              (list end (webkit-katex-render--tex-math-preprocess
+                         (buffer-substring-no-properties pos end) type)))))
          ((eq type 'sw-on) ;; \( and \[
-          (webkit-katex-render--tex-math-preprocess
-           (save-excursion
-             (buffer-substring-no-properties
-              pos
-              (re-search-forward texmathp-onoff-regexp)))
-           type))))
+          (save-excursion
+            (let ((end (re-search-forward texmathp-onoff-regexp)))
+              (list end
+                    (webkit-katex-render--tex-math-preprocess
+                     (buffer-substring-no-properties pos end)
+                     type)))))))
     nil))
 
 (defun webkit-katex-render--math-at-point ()
@@ -348,14 +361,16 @@
 
 (defun webkit-katex-render-show (math-at-point)
   "Activate color picker."
-  (if (not (buffer-live-p (webkit-katex-render--get-buffer)))
-      (webkit-katex-render--create))
-  (webkit-katex-render--render math-at-point)
-  (if webkit-katex-render--resize-flag
-      (progn
-        (webkit-katex-render--resize)
-        (setq webkit-katex-render--resize-flag nil)))
-  (webkit-katex-render--show)
+  (let ((pos (- (car math-at-point) 1))
+        (math (nth 1 math-at-point)))
+    (if (not (buffer-live-p (webkit-katex-render--get-buffer)))
+        (webkit-katex-render--create pos))
+    (webkit-katex-render--render math)
+    (if webkit-katex-render--resize-flag
+        (progn
+          (webkit-katex-render--resize)
+          (setq webkit-katex-render--resize-flag nil)))
+    (webkit-katex-render--show pos))
   (webkit-katex-render--set-background)
   (webkit-katex-render--set-foreground)
   (webkit-katex-render--ensure-emulation-alist)
@@ -378,12 +393,15 @@
   (kill-buffer webkit-katex-render--buffer-name))
 
 (defun webkit-katex-render-update ()
-  (let ((math-at-point (webkit-katex-render--math-at-point)))
-    (if math-at-point
-        (if (not (eq math-at-point webkit-katex-render--previous-math))
+  (let* ((math-at-point (webkit-katex-render--math-at-point))
+        (pos (car math-at-point))
+        (math (cdr math-at-point)))
+    (if math
+        (if (not (eq math webkit-katex-render--previous-math))
             (progn
               (webkit-katex-render-show math-at-point)
-              (setq webkit-katex-render--previous-math math-at-point)))
+              ;; (webkit-katex-render--resize)
+              (setq webkit-katex-render--previous-math math)))
       (webkit-katex-render-hide))))
 
 ;;;###autoload
