@@ -269,8 +269,8 @@
                              (skip-chars-backward " \r\t\n")
                              (point))))
                   (goto-char end)
-                  (funcall webkit-katex-render--org-math-preprocess-function
-                           value type)))))))
+                  (list end (funcall webkit-katex-render--org-math-preprocess-function
+                                     value type))))))))
     nil))
 
 (defun webkit-katex-render--tex-math-preprocess (math type)
