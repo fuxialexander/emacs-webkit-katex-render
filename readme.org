@@ -14,11 +14,10 @@ Please checkout the demo [[https://youtu.be/jPz-gUWbIaw][video]].
 :END:
 You need emacs compiled with ~xwidget~ support.
 
-If you are on mac OS, you need to apply this [[https://gist.github.com/fuxialexander/0231e994fd27be6dd87db60339238813][patch]] to emacs master branch and compile using the following commands:
+If you are on mac OS, you can use ~brew~ to install it.
 #+BEGIN_SRC shell
-./autogen.sh
-./configure --with-xwidgets --with-ns --with-gnutls --with-imagemagick --with-modules --with-rsvg --with-xml2
-make install
+brew tap d12frosted/homebrew-emacs-plus
+brew install emacs-plus --HEAD --with-xwidgets
 #+END_SRC
 If you are on Linux, maybe you can follow this [[https://jiegec.github.io/programming/2016/02/18/building-emacs-git-version-with-xwidgets-and-modules-in-archlinux/][blog post]].
 
