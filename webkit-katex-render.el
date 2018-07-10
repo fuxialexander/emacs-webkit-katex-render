@@ -79,37 +79,14 @@
 
 (defun webkit-katex-render--show (pos)
   "Make color picker childframe visible."
-  (when-let* ((current-frame (selected-frame))
-              (buffer (webkit-katex-render--get-buffer))
-              (frame (webkit-katex-render--get-frame)))
-    (progn
-      (select-frame frame t)
-      (switch-to-buffer buffer t t)
-      (select-frame current-frame t)
-      (make-frame-visible frame)
-      (redraw-frame frame)
-
-      (let*
-          ((position pos)
-           (parent-window (selected-window))
-           (parent-frame (window-frame parent-window))
-           (x-pixel-offset 0)
-           (y-pixel-offset 0)
-           (font-width (default-font-width))
-           (font-height (posframe--get-font-height position))
-           (frame-resize-pixelwise t)
-           (position (posframe-poshandler-point-bottom-left-corner
-                      `(         ;All poshandlers will get info from this plist.
-                        :position ,position
-                        :font-height ,font-height
-                        :font-width ,font-width
-                        :posframe ,frame
-                        :posframe-buffer ,buffer
-                        :parent-frame ,parent-frame
-                        :parent-window ,parent-window
-                        :x-pixel-offset ,x-pixel-offset
-                        :y-pixel-offset ,y-pixel-offset))))
-        (set-frame-position frame (car position) (cdr position))))))
+  (when-let* ((buffer (webkit-katex-render--get-buffer)))
+    (posframe-show buffer
+                   :position pos
+                   :poshandler 'posframe-poshandler-point-bottom-left-corner
+                   :width 1
+                   :height 1
+                   :internal-border-width 5
+                   :background-color webkit-katex-render--background-color)))
 
 (defun webkit-katex-render--create (pos)
   "Create a new posframe and launch Webkit."
