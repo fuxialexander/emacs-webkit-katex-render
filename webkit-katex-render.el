@@ -233,21 +233,21 @@
           (when (memq (org-element-type datum)
                       '(latex-environment latex-fragment))
             (setq beg (org-element-property :begin datum))
-            (setq end (org-element-property :end datum)))
-          (save-excursion
-            (goto-char beg)
-            (let* ((context (org-element-context))
-                   (type (org-element-type context)))
-              (when (memq type '(latex-environment latex-fragment))
-                (let ((value (org-element-property :value context))
-                      (beg (org-element-property :begin context))
-                      (end (save-excursion
-                             (goto-char (org-element-property :end context))
-                             (skip-chars-backward " \r\t\n")
-                             (point))))
-                  (goto-char end)
-                  (list end (funcall webkit-katex-render--org-math-preprocess-function
-                                     value type))))))))
+            (setq end (org-element-property :end datum))
+            (save-excursion
+              (goto-char beg)
+              (let* ((context (org-element-context))
+                     (type (org-element-type context)))
+                (when (memq type '(latex-environment latex-fragment))
+                  (let ((value (org-element-property :value context))
+                        (beg (org-element-property :begin context))
+                        (end (save-excursion
+                               (goto-char (org-element-property :end context))
+                               (skip-chars-backward " \r\t\n")
+                               (point))))
+                    (goto-char end)
+                    (list end (funcall webkit-katex-render--org-math-preprocess-function
+                                       value type)))))))))
     nil))
 
 (defun webkit-katex-render--tex-math-preprocess (math type)
@@ -329,12 +329,16 @@
 
 (defun webkit-katex-render--math-at-point ()
   "Return recognized math at point."
-  (or (and (equal major-mode 'latex-mode)
-           (webkit-katex-render--tex-math-at-point))
-      (and (equal major-mode 'org-mode)
-           (webkit-katex-render--org-math-at-point))
-      (when webkit-katex-render--math-at-point-function
-        (funcall webkit-katex-render--math-at-point-function))))
+  (condition-case err
+      (or (and (equal major-mode 'latex-mode)
+               (webkit-katex-render--tex-math-at-point))
+          (and (equal major-mode 'org-mode)
+               (webkit-katex-render--org-math-at-point))
+          (when webkit-katex-render--math-at-point-function
+            (funcall webkit-katex-render--math-at-point-function)))
+    (error
+     (message "[Error] webkit-kate-render--math-at-point, %s" (error-message-string err))
+     nil)))
 
 (defun webkit-katex-render-show (math-at-point)
   "Activate color picker."
@@ -367,7 +371,8 @@
   (dolist (xwidget-view xwidget-view-list)
     (delete-xwidget-view xwidget-view))
   (posframe-delete-all)
-  (kill-buffer webkit-katex-render--buffer-name))
+  (when (buffer-live-p webkit-katex-render--buffer-name)
+    (kill-buffer webkit-katex-render--buffer-name)))
 
 (defun webkit-katex-render-update ()
   (let* ((math-at-point (webkit-katex-render--math-at-point))
