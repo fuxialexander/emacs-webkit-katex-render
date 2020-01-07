@@ -211,7 +211,10 @@
 
 (defun webkit-katex-render--org-math-preprocess (math type)
   (if (eq type 'latex-fragment)
-      (setq math (substring math 2 -2))
+      (if (and (string-prefix-p "$" math)
+               (not (string-prefix-p "$$" math)))
+          (setq math (substring math 1 -1))
+        (setq math (substring math 2 -2)))
     (if (eq type 'latex-environment)
         (progn
           (setq math
