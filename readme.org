@@ -19,7 +19,15 @@ If you are on mac OS, you can use ~brew~ to install it.
 brew tap d12frosted/homebrew-emacs-plus
 brew install emacs-plus --HEAD --with-xwidgets
 #+END_SRC
-If you are on Linux, maybe you can follow this [[https://jiegec.github.io/programming/2016/02/18/building-emacs-git-version-with-xwidgets-and-modules-in-archlinux/][blog post]].
+On Linux, you can build Emacs from git Repository.
+#+begin_src sh
+  git clone --depth 1 --branch emacs-27 https://github.com/emacs-mirror/emacs.git
+  cd emacs
+  ./autogen.sh
+  ./configure --with-modules --with-xwidgets
+  make -j4
+  sudo make install
+#+end_src
 
 * Install
 :PROPERTIES:

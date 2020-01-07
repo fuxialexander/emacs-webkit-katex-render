@@ -211,7 +211,10 @@
 
 (defun webkit-katex-render--org-math-preprocess (math type)
   (if (eq type 'latex-fragment)
-      (setq math (substring math 2 -2))
+      (if (and (string-prefix-p "$" math)
+               (not (string-prefix-p "$$" math)))
+          (setq math (substring math 1 -1))
+        (setq math (substring math 2 -2)))
     (if (eq type 'latex-environment)
         (progn
           (setq math
@@ -396,10 +399,10 @@
           (user-error "Your Emacs was not compiled with xwidgets support"))
         (unless (display-graphic-p)
           (user-error "webkit-katex-render only works in graphical displays"))
-        (add-hook 'post-self-insert-hook #'webkit-katex-render--resize)
-        (add-hook 'post-command-hook #'webkit-katex-render-update))
-    (remove-hook 'post-command-hook #'webkit-katex-render-update)
-    (remove-hook 'post-self-insert-hook #'webkit-katex-render--resize)
+        (add-hook 'post-self-insert-hook #'webkit-katex-render--resize nil t)
+        (add-hook 'post-command-hook #'webkit-katex-render-update nil t))
+    (remove-hook 'post-command-hook #'webkit-katex-render-update t)
+    (remove-hook 'post-self-insert-hook #'webkit-katex-render--resize t)
     (webkit-katex-render-cleanup)))
 
 (provide 'webkit-katex-render)
