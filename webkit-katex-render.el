@@ -3,7 +3,7 @@
 ;; Copyright (C) 2018 Alexander Fu Xi
 
 ;; Author: Alexander Fu Xi <fuxialexander@gmail.com>
-;; URL: https://github.com/osener/emacs-webkit-katex-render
+;; URL: https://github.com/fuxialexander/emacs-webkit-katex-render
 ;; Maintainer: Alexander Fu Xi  <fuxialexander@gmail.com>
 ;; Version: 0.1.0
 ;; Keywords: tools
@@ -78,7 +78,7 @@
         (webkit-katex-render--set-foreground)))))
 
 (defun webkit-katex-render--show (pos)
-  "Make color picker childframe visible."
+  "Make katex render childframe visible."
   (when-let* ((buffer (webkit-katex-render--get-buffer)))
     (posframe-show buffer
                    :position pos
@@ -114,11 +114,11 @@
   (webkit-katex-render--run-xwidget))
 
 (defun webkit-katex-render--get-buffer ()
-  "Return color picker buffer."
+  "Return katex render buffer."
   (get-buffer webkit-katex-render--buffer-name))
 
 (defun webkit-katex-render--get-frame ()
-  "Return color picker frame."
+  "Return katex render frame."
   (when-let* ((buffer (webkit-katex-render--get-buffer)))
     (seq-find
      (lambda (frame)
@@ -128,13 +128,13 @@
      (frame-list))))
 
 (defun webkit-katex-render--set-background ()
-  "Evaluate JS code in color picker Webkit instance."
+  "Evaluate JS code in katex render Webkit instance."
   (webkit-katex-render--execute-script
    (format "document.body.style.background = '%s';"
            webkit-katex-render--background-color)))
 
 (defun webkit-katex-render--set-foreground ()
-  "Evaluate JS code in color picker Webkit instance."
+  "Evaluate JS code in katex render Webkit instance."
   (webkit-katex-render--execute-script
    (format "document.body.style.color = '%s';"
            webkit-katex-render--foreground-color)))
@@ -145,25 +145,25 @@
 (defvar-local webkit-katex-render--last-position nil)
 
 (defsubst webkit-katex-render--enable-overriding-keymap (keymap)
-  "Enable color picker overriding KEYMAP."
+  "Enable katex render overriding KEYMAP."
   (webkit-katex-render--uninstall-map)
   (setq webkit-katex-render--my-keymap keymap))
 
 (defun webkit-katex-render--ensure-emulation-alist ()
-  "Append color picker emulation alist."
+  "Append katex render emulation alist."
   (unless (eq 'webkit-katex-render--emulation-alist (car emulation-mode-map-alists))
     (setq emulation-mode-map-alists
           (cons 'webkit-katex-render--emulation-alist
                 (delq 'webkit-katex-render--emulation-alist emulation-mode-map-alists)))))
 
 (defun webkit-katex-render--install-map ()
-  "Install temporary color picker keymap."
+  "Install temporary katex render keymap."
   (unless (or (cdar webkit-katex-render--emulation-alist)
               (null webkit-katex-render--my-keymap))
     (setf (cdar webkit-katex-render--emulation-alist) webkit-katex-render--my-keymap)))
 
 (defun webkit-katex-render--uninstall-map ()
-  "Uninstall temporary color picker keymap."
+  "Uninstall temporary katex render keymap."
   (setf (cdar webkit-katex-render--emulation-alist) nil))
 
 (defvar webkit-katex-render--active-map
@@ -193,7 +193,7 @@
     (set-frame-size frame new-width new-height t)))
 
 (defun webkit-katex-render--resize (&optional arg)
-  "Resize color picker frame to widget boundaries."
+  "Resize katex render frame to widget boundaries."
   (webkit-katex-render--execute-script
    "[document.querySelector('.katex-html').offsetWidth, document.querySelector('.katex-html').offsetHeight];"
    'webkit-katex-render--resize-helper))
@@ -344,33 +344,35 @@
      nil)))
 
 (defun webkit-katex-render-show (math-at-point)
-  "Activate color picker."
-  (let ((pos (- (car math-at-point) 1))
-        (math (nth 1 math-at-point)))
-    (if (not (buffer-live-p (webkit-katex-render--get-buffer)))
-        (webkit-katex-render--create pos))
-    (webkit-katex-render--render math)
-    (if webkit-katex-render--resize-flag
-        (progn
-          (webkit-katex-render--resize)
-          (setq webkit-katex-render--resize-flag nil)))
-    (webkit-katex-render--show pos))
-  (webkit-katex-render--set-background)
-  (webkit-katex-render--set-foreground)
-  (webkit-katex-render--ensure-emulation-alist)
-  (webkit-katex-render--enable-overriding-keymap webkit-katex-render--active-map)
-  (webkit-katex-render--install-map)
-  t)
+  "Activate katex render."
+  (unless (and (bound-and-true-p company-mode)
+               company-candidates-length)
+    (let ((pos (- (car math-at-point) 1))
+          (math (nth 1 math-at-point)))
+      (if (not (buffer-live-p (webkit-katex-render--get-buffer)))
+          (webkit-katex-render--create pos))
+      (webkit-katex-render--render math)
+      (if webkit-katex-render--resize-flag
+          (progn
+            (webkit-katex-render--resize)
+            (setq webkit-katex-render--resize-flag nil)))
+      (webkit-katex-render--show pos))
+    (webkit-katex-render--set-background)
+    (webkit-katex-render--set-foreground)
+    (webkit-katex-render--ensure-emulation-alist)
+    (webkit-katex-render--enable-overriding-keymap webkit-katex-render--active-map)
+    (webkit-katex-render--install-map)
+    t))
 
 (defun webkit-katex-render-hide ()
-  "Hide color picker frame."
+  "Hide katex render frame."
   (setq webkit-katex-render--resize-flag t)
   (when-let* ((frame (webkit-katex-render--get-frame)))
     (make-frame-invisible frame))
   (webkit-katex-render--enable-overriding-keymap nil))
 
 (defun webkit-katex-render-cleanup ()
-  "Destroy color picker buffer and frame."
+  "Destroy katex render buffer and frame."
   (dolist (xwidget-view xwidget-view-list)
     (delete-xwidget-view xwidget-view))
   (posframe-delete-all)
